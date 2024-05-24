@@ -1,0 +1,43 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       Int     @id @default(autoincrement())
+  username String  @unique @db.VarChar(30)
+  password String  @db.VarChar(72)
+  email    String?
+  todos    Todo[]
+
+  @@map("users")
+}
+
+model Todo {
+  id        Int      @id @default(autoincrement())
+  title     String   @db.VarChar(150)
+  status    Status   @default(PENDING)
+  dueDate   DateTime @map("due_date") @db.Date
+  userId    Int      @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamp(0)
+
+  @@map("todos")
+}
+
+enum Status {
+  PENDING
+  DOING
+  DONE
+}
